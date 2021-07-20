@@ -17,6 +17,15 @@ public class Contatto {
         this.telefono = telefono;
     }
 
+    public Contatto(Long id, String nome, String cognome, String telefono) {
+        this.id = id;
+        this.nome = nome;
+        this.cognome = cognome;
+        this.telefono = telefono;
+    }
+    
+    
+
     public Long getId() {
         return id;
     }
