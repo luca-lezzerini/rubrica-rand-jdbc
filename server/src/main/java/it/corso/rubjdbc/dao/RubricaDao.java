@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,17 +23,54 @@ public class RubricaDao {
     }
 
     public Contatto salva(Contatto c) {
-        // leggere ultimo numero su hibernate_sequence Q1
-        
-        // incrementarlo di 1 -> new_id
-        
-        // fare la insert su contatto usando il nuovo valore new_id Q2
-        
-        // aggiornare hibernate_sequence con il nuovo valore new_id Q3
-        
-        // recuperare da DB il record con new_id e restiruirlo Q4
-        
-        throw new UnsupportedOperationException();
+        Contatto result;
+        long new_id;
+
+        try ( Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/rubrica?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useLegacyDatetimeCode=false&serverTimezone=Europe/Berlin&useSSL=false",
+                "root",
+                "");  
+                Statement hib_not_found = conn.createStatement();  
+                ResultSet hib_rs = conn.createStatement().executeQuery("SELECT next_val FROM hibernate_sequence");  
+                PreparedStatement hib_update = conn.prepareStatement("UPDATE hibernate_sequence SET next_val = ?");  
+                PreparedStatement new_contatto = conn.prepareStatement("INSERT INTO contatto (id, cognome, nome, telefono) VALUES (?, ?, ?, ?)");  
+                PreparedStatement contatto_stmt = conn.prepareStatement("SELECT * FROM contatto WHERE id = ?")) {
+
+            if (hib_rs.next()) {
+                new_id = hib_rs.getLong("next_val") + 1;
+            } else {
+                hib_not_found.executeUpdate("INSERT INTO hibernate_sequence (next_val) VALUES (1)");
+                new_id = 1;
+            }
+
+            new_contatto.setLong(1, new_id);
+            new_contatto.setString(2, c.getCognome());
+            new_contatto.setString(3, c.getNome());
+            new_contatto.setString(4, c.getTelefono());
+
+            new_contatto.executeUpdate();
+
+            hib_update.setLong(1, new_id);
+            hib_update.executeUpdate();
+
+            contatto_stmt.setLong(1, new_id);
+
+            try ( ResultSet rs = contatto_stmt.executeQuery()) {
+                if (rs.next()) {
+                    result = new Contatto(rs.getLong("id"),
+                            rs.getString("cognome"),
+                            rs.getString("nome"),
+                            rs.getString("telefono"));
+                    return result;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public void rimuovi(Contatto c) {
@@ -63,9 +101,7 @@ public class RubricaDao {
         try ( Connection con = DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/rubricarand",
                 "root",
-                "");  
-                Statement stat = con.createStatement();  
-                ResultSet res = stat.executeQuery(sql);) {
+                "");  Statement stat = con.createStatement();  ResultSet res = stat.executeQuery(sql);) {
 
             // prepara select *
             // la esegue e ottiene un ResultSet
