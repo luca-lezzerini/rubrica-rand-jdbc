@@ -22,6 +22,16 @@ public class RubricaDao {
     }
 
     public Contatto salva(Contatto c) {
+        // leggere ultimo numero su hibernate_sequence Q1
+        
+        // incrementarlo di 1 -> new_id
+        
+        // fare la insert su contatto usando il nuovo valore new_id Q2
+        
+        // aggiornare hibernate_sequence con il nuovo valore new_id Q3
+        
+        // recuperare da DB il record con new_id e restiruirlo Q4
+        
         throw new UnsupportedOperationException();
     }
 
