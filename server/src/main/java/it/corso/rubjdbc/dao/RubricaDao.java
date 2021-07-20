@@ -1,6 +1,8 @@
 package it.corso.rubjdbc.dao;
 
+import it.corso.rubjdbc.datasource.JdbcDataSource;
 import it.corso.rubjdbc.model.Contatto;
+import it.corso.rubjdbc.model.HibernateSequence;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -23,18 +25,25 @@ public class RubricaDao {
     }
 
     public Contatto salva(Contatto c) {
+        try {
+            JdbcDataSource ds = new JdbcDataSource();
+            List<HibernateSequence> rs_hs = ds.querySelect("select * from hibernate_sequence", new HibernateSequence());
+            List<Contatto> rs_contatti = ds.querySelect("select * from contatti", Contatto::leggiQua);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Deprecated
+    public Contatto salvaOld(Contatto c) {
         Contatto result;
         long new_id;
 
         try ( Connection conn = DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/rubrica?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useLegacyDatetimeCode=false&serverTimezone=Europe/Berlin&useSSL=false",
                 "root",
-                "");  
-                Statement hib_not_found = conn.createStatement();  
-                ResultSet hib_rs = conn.createStatement().executeQuery("SELECT next_val FROM hibernate_sequence");  
-                PreparedStatement hib_update = conn.prepareStatement("UPDATE hibernate_sequence SET next_val = ?");  
-                PreparedStatement new_contatto = conn.prepareStatement("INSERT INTO contatto (id, cognome, nome, telefono) VALUES (?, ?, ?, ?)");  
-                PreparedStatement contatto_stmt = conn.prepareStatement("SELECT * FROM contatto WHERE id = ?")) {
+                "");  Statement hib_not_found = conn.createStatement();  ResultSet hib_rs = conn.createStatement().executeQuery("SELECT next_val FROM hibernate_sequence");  PreparedStatement hib_update = conn.prepareStatement("UPDATE hibernate_sequence SET next_val = ?");  PreparedStatement new_contatto = conn.prepareStatement("INSERT INTO contatto (id, cognome, nome, telefono) VALUES (?, ?, ?, ?)");  PreparedStatement contatto_stmt = conn.prepareStatement("SELECT * FROM contatto WHERE id = ?")) {
 
             if (hib_rs.next()) {
                 new_id = hib_rs.getLong("next_val") + 1;
