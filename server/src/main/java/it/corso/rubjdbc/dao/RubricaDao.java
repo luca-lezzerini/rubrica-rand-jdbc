@@ -27,6 +27,11 @@ public class RubricaDao {
     }
 
     public Contatto salva(Contatto c) {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    public void esempio(Contatto c) {
         try {
             JdbcDataSource ds = new JdbcDataSource();
             List<HibernateSequence> rs_hs = ds.querySelect("select * from hibernate_sequence", new HibernateSequence());
@@ -54,9 +59,14 @@ public class RubricaDao {
             List<Contatto> rs_contatti3 = ds.querySelect("select * from contatti", Contatto::leggiQua);
 
             List<Contatto> rs_contatti4 = ds.parametricQuerySelect(
-                    "select * from contatti where id = ?",
-                    new Contatto(),
-                    pm -> pm.setLong(1, 1L));
+                    "select * from contatti where id = ? and nome like ? or codice = ?",
+                    Contatto::leggiQua,
+                    pm -> {
+                        pm.setLong(1, 123L);
+                        pm.setString(2, "Mari%");
+                        pm.setString(3, "XC2107");
+                    });
+
         } catch (Exception e) {
             e.printStackTrace();
         }

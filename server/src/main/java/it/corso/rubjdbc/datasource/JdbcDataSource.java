@@ -23,7 +23,16 @@ public class JdbcDataSource{
         return entity.readFromResultSet(res);
     }
 
-    public <T extends ResultSetReader> List<T> parametricQuerySelect(String sql, T entity, Parametrizer p) throws SQLException {
+    /**
+     * 
+     * @param <T> tipo dell'entità da ritornare
+     * @param sql stringa sql con parametri (?)
+     * @param entity ORM embrionale per mappare da result set a POJO
+     * @param p 
+     * @return lista delle entità recuperate dalla query
+     * @throws SQLException 
+     */
+    public <T> List<T> parametricQuerySelect(String sql, ResultSetReader<T> entity, Parametrizer p) throws SQLException {
         con = getConnection();
         prep = con.prepareStatement(sql);
         p.parametrize(prep);
