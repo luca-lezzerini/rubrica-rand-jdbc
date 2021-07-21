@@ -1,6 +1,8 @@
 package it.corso.rubjdbc.dao;
 
+import it.corso.rubjdbc.datasource.ContattoOrm;
 import it.corso.rubjdbc.datasource.JdbcDataSource;
+import it.corso.rubjdbc.datasource.ResultSetReader;
 import it.corso.rubjdbc.model.Contatto;
 import it.corso.rubjdbc.model.HibernateSequence;
 import java.sql.Connection;
@@ -28,8 +30,33 @@ public class RubricaDao {
         try {
             JdbcDataSource ds = new JdbcDataSource();
             List<HibernateSequence> rs_hs = ds.querySelect("select * from hibernate_sequence", new HibernateSequence());
-            List<Contatto> rs_contatti = ds.querySelect("select * from contatti", Contatto::leggiQua);
-            
+//            List<Contatto> rs_contatti = ds.querySelect("select * from contatti", new Contatto());  // troppo grande
+//            List<Contatto> rs_contatti = ds.querySelect("select * from contatti", new ContattoOrm()); // devo creare altra classe
+            List<Contatto> rs_contatti = ds.querySelect("select * from contatti", new ResultSetReader<Contatto>() { // esistono le lambda!
+                @Override
+                public List<Contatto> readFromResultSet(ResultSet rs) throws SQLException {
+                    return Contatto.leggiQua(rs);
+                }
+            });
+            List<Contatto> rs_contatti11 = ds.querySelect("select * from contatti", rs -> {
+                List<Contatto> lista = new ArrayList<>();
+                while (rs.next()) {
+                    Contatto cx = new Contatto(rs.getLong("id"),
+                            rs.getString("cognome"),
+                            rs.getString("nome"),
+                            rs.getString("telefono"));
+                    lista.add(cx);
+                }
+                return lista;
+            }
+            );
+            List<Contatto> rs_contatti2 = ds.querySelect("select * from contatti", rs -> Contatto.leggiQua(rs));
+            List<Contatto> rs_contatti3 = ds.querySelect("select * from contatti", Contatto::leggiQua);
+
+            List<Contatto> rs_contatti4 = ds.parametricQuerySelect(
+                    "select * from contatti where id = ?",
+                    new Contatto(),
+                    pm -> pm.setLong(1, 1L));
         } catch (Exception e) {
             e.printStackTrace();
         }

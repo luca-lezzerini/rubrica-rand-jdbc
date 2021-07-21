@@ -2,6 +2,7 @@ package it.corso.rubjdbc.datasource;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -11,12 +12,22 @@ public class JdbcDataSource{
 
     Connection con;
     Statement stmt;
+    PreparedStatement prep;
     ResultSet res;
 
-    public <T extends ResultSetReader> List<T> querySelect(String sql, T entity) throws SQLException {
+//    public <T extends ResultSetReader> List<T> querySelect(String sql, T entity) throws SQLException {
+    public <T> List<T> querySelect(String sql, ResultSetReader<T> entity) throws SQLException {
         con = getConnection();
         stmt = con.createStatement();
         res = stmt.executeQuery(sql);
+        return entity.readFromResultSet(res);
+    }
+
+    public <T extends ResultSetReader> List<T> parametricQuerySelect(String sql, T entity, Parametrizer p) throws SQLException {
+        con = getConnection();
+        prep = con.prepareStatement(sql);
+        p.parametrize(prep);
+        res = prep.executeQuery();
         return entity.readFromResultSet(res);
     }
 

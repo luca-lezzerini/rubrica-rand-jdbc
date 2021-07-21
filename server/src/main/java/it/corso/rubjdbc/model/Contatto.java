@@ -1,11 +1,13 @@
 package it.corso.rubjdbc.model;
 
+import it.corso.rubjdbc.datasource.ResultSetReader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Contatto  {
+//public class Contatto implements ResultSetReader<Contatto>{
+public class Contatto {
 
     Long id;
 
@@ -78,7 +80,9 @@ public class Contatto  {
 //        }
 //        return lista;
 //    }
-
+    
+//    @Override
+//    public List<Contatto> readFromResultSet(ResultSet rs) throws SQLException {
     public static List<Contatto> leggiQua(ResultSet rs) throws SQLException {
         List<Contatto> lista = new ArrayList<>();
         while (rs.next()) {
