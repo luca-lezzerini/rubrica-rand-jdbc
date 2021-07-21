@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
-public class JdbcDataSource{
+public class JdbcDataSource {
 
     Connection con;
     Statement stmt;
@@ -24,13 +24,13 @@ public class JdbcDataSource{
     }
 
     /**
-     * 
+     *
      * @param <T> tipo dell'entità da ritornare
      * @param sql stringa sql con parametri (?)
      * @param entity ORM embrionale per mappare da result set a POJO
-     * @param p 
+     * @param p
      * @return lista delle entità recuperate dalla query
-     * @throws SQLException 
+     * @throws SQLException
      */
     public <T> List<T> parametricQuerySelect(String sql, ResultSetReader<T> entity, Parametrizer p) throws SQLException {
         con = getConnection();
@@ -38,6 +38,28 @@ public class JdbcDataSource{
         p.parametrize(prep);
         res = prep.executeQuery();
         return entity.readFromResultSet(res);
+    }
+
+    /**
+     *
+     * @param sql stringa sql con parametri (?)
+     * @param p
+     * @return numero dei record modificati
+     * @throws SQLException
+     */
+    public int parametricQueryUpdate(String sql, Parametrizer p) throws SQLException {
+        con = getConnection();
+        prep = con.prepareStatement(sql);
+        p.parametrize(prep);
+        int i = prep.executeUpdate();
+        return i;
+    }
+
+    public int insertQuery(EntityWriter entity) throws SQLException {
+        con = getConnection();
+        prep = entity.prepareForWriting(con);
+        int i = prep.executeUpdate();
+        return i;
     }
 
     public Connection getConnection() throws SQLException {

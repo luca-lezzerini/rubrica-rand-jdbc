@@ -26,9 +26,15 @@ public class RubricaDao {
         return dao;
     }
 
-    public Contatto salva(Contatto c) {
-        // TODO
-        throw new UnsupportedOperationException();
+    public Contatto salva(Contatto c) throws SQLException {
+        JdbcDataSource ds = new JdbcDataSource();
+        ds.insertQuery(c);
+        var lista = ds.parametricQuerySelect("select * from Contatto where id = ?", Contatto::leggiQua, rs -> rs.setLong(1, c.getId()));
+        if (lista.isEmpty()) {
+            return null;
+        } else {
+            return lista.get(0);
+        }
     }
 
     public void esempio(Contatto c) {

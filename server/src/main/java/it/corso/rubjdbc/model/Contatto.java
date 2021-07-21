@@ -1,13 +1,15 @@
 package it.corso.rubjdbc.model;
 
-import it.corso.rubjdbc.datasource.ResultSetReader;
+import it.corso.rubjdbc.datasource.EntityWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 //public class Contatto implements ResultSetReader<Contatto>{
-public class Contatto {
+public class Contatto implements EntityWriter{
 
     Long id;
 
@@ -93,6 +95,18 @@ public class Contatto {
             lista.add(cx);
         }
         return lista;
+    }
+
+    @Override
+    public PreparedStatement prepareForWriting(Connection con) throws SQLException{
+        String sql = "insert into Contatto (\"id\",\"nome\",\"cognome\",\"telefono\")"
+                + " values (?,?,?,?)";
+        PreparedStatement prep = con.prepareStatement(sql);
+        prep.setLong(1,getId());
+        prep.setString(2,getNome());
+        prep.setString(3,getCognome());
+        prep.setString(4,getTelefono());
+        return prep;
     }
 
 }
